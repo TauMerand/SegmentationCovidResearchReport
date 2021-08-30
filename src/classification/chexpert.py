@@ -21,6 +21,7 @@ def train_model(model, train_loader, criterion, optimizer, device, save_freq=Non
   model.train()
   train_loss = []
   if device.type == 'cuda' or device.type == 'cpu':
+    model.to(device)
     loop = tqdm(train_loader)
     for i, (images, labels) in enumerate(loop):
       images = images.to(device)
@@ -52,6 +53,7 @@ def eval_model(model, val_loader, criterion, device):
   model.eval()
   val_loss = 0.0
   if device.type == 'cuda' or device.type == 'cpu':
+    model.to(device)
     for images, labels in tqdm(val_loader):
         images = images.to(device)
         labels = labels.to(device)
