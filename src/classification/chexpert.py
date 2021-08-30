@@ -5,7 +5,7 @@ import numpy as np
 import time
 import os
 
-from tqdm import tqdm
+from tqdm import tqdm, trange
 
 import torch
 from torch.utils.data import DataLoader
@@ -78,7 +78,7 @@ def vgg16_classifier(paths, img_dir, epochs, device, ckpt_dir, start_time, save_
   optimizer = torch.optim.Adam( vgg16_classifier.parameters(),
                                 lr=0.001)
   min_val_loss=np.inf
-  loop = tqdm.trange(epochs)
+  loop = trange(epochs)
   for i in loop:
     t_loss=train_model(vgg16_classifier, train, criterion, optimizer, device,
                       save_freq, start_time, time_out, ckpt_dir)
