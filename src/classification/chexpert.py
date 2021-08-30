@@ -1,4 +1,4 @@
-from models import PretrainClassifier
+from .models import PretrainClassifier
 from data import ChexpertLoader
 
 import numpy as np
