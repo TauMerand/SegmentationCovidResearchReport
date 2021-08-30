@@ -39,7 +39,8 @@ def train_model(model, train_loader, criterion, optimizer, device, save_freq=Non
           print("Saving Model with loss: {:02d}".format(ave_loss))
           filename=ckpt_dir+'/vgg16_train_{}_{:02d}.pt'.format(i, ave_loss)
           torch.save(model.state_dict(), filename)
-      # loop.set_postfix(loss=np.mean(train_loss))
+      
+      loop.set_postfix(loss=np.mean(train_loss))
   else: #TODO TPU XLA code
     print("TPU")
 
