@@ -78,7 +78,7 @@ def vgg16_classifier(paths, img_dir, epochs, device, ckpt_dir, start_time, save_
   optimizer = torch.optim.Adam( vgg16_classifier.parameters(),
                                 lr=0.001)
   min_val_loss=np.inf
-  loop = tqdm(epochs)
+  loop = tqdm.trange(epochs)
   for i in loop:
     t_loss=train_model(vgg16_classifier, train, criterion, optimizer, device,
                       save_freq, start_time, time_out, ckpt_dir)
