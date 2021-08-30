@@ -3,6 +3,7 @@ from .data import ChexpertLoader
 
 import numpy as np
 import time
+import os
 
 from tqdm import tqdm
 
@@ -67,6 +68,7 @@ def eval_model(model, val_loader, criterion, device):
 
 def vgg16_classifier(paths, img_dir, epochs, device, ckpt_dir, start_time, save_freq, time_out):
   train, val = ChexpertLoader(train_path=paths[0], val_path=paths[1], image_dir=img_dir)
+  os.makedirs(ckpt_dir, exist_ok = True)
   vgg16_classifier = PretrainClassifier(backbone="vgg16", 
                                         weights="imagenet",
                                         num_classes=14,
