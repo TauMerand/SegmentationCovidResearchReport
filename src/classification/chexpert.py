@@ -22,7 +22,7 @@ def train_model(model, train_loader, criterion, optimizer, device, save_freq=Non
   train_loss = []
   if device.type == 'cuda' or device.type == 'cpu':
     model.to(device)
-    loop = tqdm(train_loader, position=1, leave=True, desc='Train Inner')
+    loop = tqdm(train_loader, position=1, leave=False, desc='Train Inner')
     for i, (images, labels) in enumerate(loop):
       images = images.to(device)
       labels = labels.to(device)
