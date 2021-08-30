@@ -66,8 +66,8 @@ def eval_model(model, val_loader, criterion, device):
   return val_loss / len(val_loader.dataset)
 
 
-def vgg16_classifier(paths, img_dir, epochs, device, ckpt_dir, start_time, save_freq, time_out):
-  train, val = ChexpertLoader(train_path=paths[0], val_path=paths[1], image_dir=img_dir)
+def vgg16_classifier(paths, img_dir, epochs, device, ckpt_dir, start_time, save_freq, time_out, fracs=(1, 1)):
+  train, val = ChexpertLoader(train_path=paths[0], val_path=paths[1], image_dir=img_dir, train_frac=fracs[0], val_frac=fracs[1])
   os.makedirs(ckpt_dir, exist_ok = True)
   vgg16_classifier = PretrainClassifier(backbone="vgg16", 
                                         weights="imagenet",
