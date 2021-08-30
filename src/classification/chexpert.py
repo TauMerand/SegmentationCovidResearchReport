@@ -1,5 +1,5 @@
 from .models import PretrainClassifier
-from data import ChexpertLoader
+from .data import ChexpertLoader
 
 import numpy as np
 import time
