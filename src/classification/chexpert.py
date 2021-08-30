@@ -40,8 +40,8 @@ def train_model(model, train_loader, criterion, optimizer, device, save_freq=Non
       if save_freq and i % save_freq == 0:
         if time.time() - start_time > 0.8*time_out:
           ave_loss=np.mean(train_loss)
-          print("Saving Model with loss: {:02d}".format(ave_loss))
-          filename=ckpt_dir+'/vgg16_train_{}_{:02d}.pt'.format(i, ave_loss)
+          # print("Saving Model with loss: {:.3f}".format(ave_loss))
+          filename=ckpt_dir+'/vgg16_train_{}_{:.3f}.pt'.format(i, ave_loss)
           torch.save(model.state_dict(), filename)
       
       loop.set_postfix(loss=np.mean(train_loss))
@@ -88,17 +88,17 @@ def vgg16_classifier(paths, img_dir, epochs, device, ckpt_dir, start_time, save_
                       save_freq, start_time, time_out, ckpt_dir)
 
     if time.time() - start_time > 0.9*time_out:
-      filename=ckpt_dir+"/vgg_epoch_{}_train_{}.pt".format(i, t_loss)
+      filename=ckpt_dir+"/vgg_epoch_{}_train_{:.3f}.pt".format(i, t_loss)
       torch.save(vgg16_classifier.state_dict, filename)
 
     curr_loss=eval_model(vgg16_classifier, val, criterion, device)
 
     if curr_loss<min_val_loss:
-      filename=ckpt_dir+"/vgg_epoch_{}_train_{}_min_val_{}.pt".format(i,
+      filename=ckpt_dir+"/vgg_epoch_{}_train_{:.3f}_min_val_{:.3f}.pt".format(i,
                                                                   t_loss,
                                                                   curr_loss)
-      print("Saving Model with validation loss: {}".format(curr_loss))
+      # print("Saving Model with validation loss: {:.3f}".format(curr_loss))
       torch.save(vgg16_classifier.state_dict, filename)
       min_val_loss=curr_loss
-  filename=ckpt_dir+'/completed_vgg.pt'
+  filename=ckpt_dir+'/completed_vgg_train_{:.3f}_val_{.3f}.pt'
   torch.save(vgg16_classifier, filename)
