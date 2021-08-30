@@ -22,7 +22,7 @@ def train_model(model, train_loader, criterion, optimizer, device, save_freq=Non
   train_loss = []
   if device.type == 'cuda' or device.type == 'cpu':
     model.to(device)
-    loop = tqdm(train_loader)
+    loop = tqdm(train_loader, position=1, leave=False, desc='Train Inner')
     for i, (images, labels) in enumerate(loop):
       images = images.to(device)
       labels = labels.to(device)
@@ -80,7 +80,7 @@ def vgg16_classifier(paths, img_dir, epochs, device, ckpt_dir, start_time, save_
   optimizer = torch.optim.Adam( vgg16_classifier.parameters(),
                                 lr=0.001)
   min_val_loss=np.inf
-  loop = trange(epochs)
+  loop = trange(epochs, position=0, desc='Epochs Outer')
   for i in loop:
     t_loss=train_model(vgg16_classifier, train, criterion, optimizer, device,
                       save_freq, start_time, time_out, ckpt_dir)
