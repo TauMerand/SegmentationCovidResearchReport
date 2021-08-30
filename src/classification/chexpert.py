@@ -56,7 +56,7 @@ def eval_model(model, val_loader, criterion, device):
   val_loss = 0.0
   if device.type == 'cuda' or device.type == 'cpu':
     model.to(device)
-    for images, labels in tqdm(val_loader):
+    for images, labels in tqdm(val_loader, desc="Val Inner"):
         images = images.to(device)
         labels = labels.to(device)
 
@@ -86,13 +86,19 @@ def vgg16_classifier(paths, img_dir, epochs, device, ckpt_dir, start_time, save_
   for i in loop:
     t_loss=train_model(vgg16_classifier, train, criterion, optimizer, device,
                       save_freq, start_time, time_out, ckpt_dir)
+
     if time.time() - start_time > 0.9*time_out:
       filename=ckpt_dir+"/vgg_epoch_{}_train_{}.pt".format(i, t_loss)
       torch.save(vgg16_classifier.state_dict, filename)
+
     curr_loss=eval_model(vgg16_classifier, val, criterion, device)
+
     if curr_loss<min_val_loss:
-      filename=ckpt_dir+"/vgg_epoch_{}_train_{}_min_val_{}.pt".format(i, t_loss,
-                                                              curr_loss)
+      filename=ckpt_dir+"/vgg_epoch_{}_train_{}_min_val_{}.pt".format(i,
+                                                                  t_loss,
+                                                                  curr_loss)
+      print("Saving Model with validation loss: {}".format(curr_loss))
       torch.save(vgg16_classifier.state_dict, filename)
+      min_val_loss=curr_loss
   filename=ckpt_dir+'/completed_vgg.pt'
   torch.save(vgg16_classifier, filename)
