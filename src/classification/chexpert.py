@@ -94,7 +94,7 @@ def vgg16_classifier(loader_cfg: Optional[Dict[str, str]] = None,
                               weights=weights,
                               num_classes=14,
                               linear_in_features=512*12*10,
-                              name="vgg16_imagenet_classifier"
+                              name="vgg16_{}".format(weights)
                             )
   vgg16.to(device)
 
