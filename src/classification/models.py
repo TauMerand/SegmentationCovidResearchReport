@@ -29,6 +29,7 @@ class PretrainModel(nn.Module):
       model = PretrainModel(backbone=backbone, 
                             weights=None,
                             pretrained_path=None, 
+                            name = name
                             )
       model.load_state_dict(torch.load(pretrained_path))
       self.backbone = model.backbone
