@@ -27,7 +27,7 @@ class PretrainModel(nn.Module):
     else:
       print('Loading pretrained model from: {}'.format(pretrained_path))
       model = PretrainModel(backbone=backbone, 
-                            weights=weights,
+                            weights=None,
                             pretrained_path=None, 
                             )
       model.load_state_dict(torch.load(pretrained_path))

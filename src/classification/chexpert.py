@@ -86,6 +86,7 @@ def vgg16_classifier(loader_cfg: Optional[Dict[str, str]] = {},
                       weights: Optional[str] = "imagenet",
                       epochs: Optional[int] = 1,
                       device = torch.device("cuda" if torch.cuda.is_available() else "cpu"),
+                      pretrained_path: Optional[str] = None
                     ):
 
   train_loader, val_loader = ChexpertLoader(**loader_cfg)
@@ -94,7 +95,8 @@ def vgg16_classifier(loader_cfg: Optional[Dict[str, str]] = {},
                               weights=weights,
                               num_classes=14,
                               linear_in_features=512*12*10,
-                              name="vgg16_{}".format(weights)
+                              name="vgg16_{}".format(weights),
+                              pretrained_path=pretrained_path
                             )
   vgg16.to(device)
 
@@ -116,8 +118,3 @@ def vgg16_classifier(loader_cfg: Optional[Dict[str, str]] = {},
     if val_loss<min_val_loss:
       save_checkpoint(vgg16, epoch=i, train_loss=curr_loss, val_loss=val_loss, **save_cfg) 
       min_val_loss=val_loss
-  #     # print("Saving Model with validation loss: {:.3f}".format(curr_loss))
-  #     torch.save(vgg16_classifier.state_dict, filename)
-  #     min_val_loss=curr_loss
-  # filename=ckpt_dir+'/completed_vgg_train_{:.3f}_val_{.3f}.pt'
-  # torch.save(vgg16_classifier, filename)
