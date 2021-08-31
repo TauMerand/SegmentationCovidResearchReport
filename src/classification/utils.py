@@ -30,4 +30,4 @@ def save_checkpoint(model,
   if val_loss is not None:
     ckpt_path+="_v:{:.3f}".format(val_loss)
   
-  torch.save(model.state_dict, ckpt_path+".pt")
+  torch.save(model.state_dict(), ckpt_path+".pt")
