@@ -12,10 +12,12 @@ from segmentation_models_pytorch.base import initialization as init
 class PretrainModel(nn.Module):
   def __init__( self, 
                 backbone: str, 
+                name: str,
                 weights: Optional[str] = None,
                 pretrained_path: Optional[str] = None,
               ):
     super().__init__()
+    self.name=name
     if pretrained_path is None:
       self.backbone=get_encoder(backbone, 
                                 in_channels=3, 
@@ -44,12 +46,16 @@ class PretrainClassifier(PretrainModel):
                 backbone: str, 
                 num_classes: int,
                 linear_in_features: int,
+                name: str,
                 weights: Optional[str] = None,
                 pretrained_path: Optional[str] = None,
+                
               ):
-    model=super().__init__( backbone=backbone, 
-                      weights=weights,
-                      pretrained_path=pretrained_path)
+    model=super().__init__(backbone=backbone, 
+                            weights=weights, 
+                            name=name,
+                            pretrained_path=pretrained_path
+                          )
     if pretrained_path is None and model is None:
       self.fc = nn.Linear(linear_in_features, 2048, bias=True)
       self.classify=nn.Linear(2048, num_classes)
