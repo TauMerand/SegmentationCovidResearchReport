@@ -110,7 +110,7 @@ def vgg16_classifier(loader_cfg: Optional[Dict[str, str]] = None,
                           optimizer, 
                           device,
                           **save_cfg)      
-    val_loss=eval_model(vgg16_classifier, val_loader, criterion, device)
+    val_loss=eval_model(vgg16, val_loader, criterion, device)
 
     if val_loss<min_val_loss:
       save_checkpoint(vgg16, epoch=i, train_loss=curr_loss, val_loss=val_loss, **save_cfg) 
