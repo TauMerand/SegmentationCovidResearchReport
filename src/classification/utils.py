@@ -27,7 +27,7 @@ def save_checkpoint(model,
                     ckpt_dir=None,
                     train_loss=None, 
                     val_loss=None,
-                    # **extra_args
+                    **extra_args
                     ):
   if ckpt_dir is None:
     ckpt_dir='./{}_ckpt'.format(model.__class__.__name__)
