@@ -81,8 +81,8 @@ def eval_model(model,
   return val_loss / len(val_loader.dataset)
 
 
-def vgg16_classifier(loader_cfg: Optional[Dict[str, str]] = None,
-                      save_cfg: Optional[Dict[str, str]] = None,
+def vgg16_classifier(loader_cfg: Optional[Dict[str, str]] = {},
+                      save_cfg: Optional[Dict[str, str]] = {},
                       weights: Optional[str] = "imagenet",
                       epochs: Optional[int] = 1,
                       device = torch.device("cuda" if torch.cuda.is_available() else "cpu"),
