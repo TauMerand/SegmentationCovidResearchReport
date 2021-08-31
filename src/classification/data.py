@@ -34,7 +34,9 @@ class ExternalImageDataset(Dataset):
         img_label[img_label==-1]=0
         return img, img_label
 
-def ChexpertLoader(train_path, val_path, image_dir,
+def ChexpertLoader(train_path,
+                  val_path, 
+                  image_dir,
                   image_size=(320, 390),
                   train_frac=1,
                   val_frac=1,

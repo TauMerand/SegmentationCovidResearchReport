@@ -1,3 +1,6 @@
+from typing import Optional, Dict
+
+from classification.utils import save_checkpoint
 from .models import PretrainClassifier
 from .data import ChexpertLoader
 
@@ -19,11 +22,21 @@ from torch.cuda.amp import autocast
 
 
 
-def train_model(model, train_loader, criterion, optimizer, device, save_freq=None, start_time=None, time_out=None, ckpt_dir=None):
+def train_model(model, 
+                train_loader, 
+                criterion, 
+                optimizer, 
+                device, 
+                **save_args):
+
+  save_freq=save_args.pop("save_freq", len(train_loader)//2)
+  start_time=save_args.pop("start_time", time.time())
+  time_out=save_args.pop("time_out", 9*60*60)
+  threshold=save_args.pop("time_threshold", 0.8)
+
   model.train()
-  train_loss = []
+  batch_losses = []
   if device.type == 'cuda' or device.type == 'cpu':
-    model.to(device)
     loop = tqdm(train_loader, desc='Train Inner')
     for i, (images, labels) in enumerate(loop):
       images = images.to(device)
@@ -36,19 +49,15 @@ def train_model(model, train_loader, criterion, optimizer, device, save_freq=Non
       loss.backward()
       optimizer.step()
 
-      train_loss.append(loss.item())
-      if save_freq and i % save_freq == 0:
-        if time.time() - start_time > 0.8*time_out:
-          ave_loss=np.mean(train_loss)
-          # print("Saving Model with loss: {:.3f}".format(ave_loss))
-          filename=ckpt_dir+'/vgg16_train_{}_{:.3f}.pt'.format(i, ave_loss)
-          torch.save(model.state_dict(), filename)
-      
-      loop.set_postfix(loss=np.mean(train_loss))
+      batch_losses.append(loss.item())
+      if i % save_freq == 0:
+        if time.time() - start_time > threshold*time_out:
+          save_checkpoint(model, train_loss=np.mean(batch_losses), **save_args)      
+      loop.set_postfix(loss=np.mean(batch_losses))
   else: #TODO TPU XLA code
     print("TPU")
 
-  return np.mean(train_loss) # = np.mean(train_loss)
+  return np.mean(batch_losses)
 
 
 def eval_model(model, val_loader, criterion, device):
@@ -70,35 +79,48 @@ def eval_model(model, val_loader, criterion, device):
   return val_loss / len(val_loader.dataset)
 
 
-def vgg16_classifier(paths, img_dir, epochs, device, ckpt_dir, start_time, save_freq, time_out, fracs=(1, 1)):
-  train, val = ChexpertLoader(train_path=paths[0], val_path=paths[1], image_dir=img_dir, train_frac=fracs[0], val_frac=fracs[1])
-  os.makedirs(ckpt_dir, exist_ok = True)
-  vgg16_classifier = PretrainClassifier(backbone="vgg16", 
-                                        weights="imagenet",
-                                        num_classes=14,
-                                        linear_in_features=512*12*10,
-                                        )
+def vgg16_classifier(file_paths: Optional[Dict[str, str]] = None,
+                      loader_cfg: Optional[Dict[str, str]] = None,
+                      saving_cfg: Optional[Dict[str, str]] = None,
+                      weights: Optional[str] = "imagenet",
+                      epochs: Optional[int] = 1,
+                      device = torch.device("cuda" if torch.cuda.is_available() else "cpu"),
+                    ):
+
+  train_loader, val_loader = ChexpertLoader(**file_paths, **loader_cfg)
+
+  vgg16 = PretrainClassifier(backbone="vgg16", 
+                              weights=weights,
+                              num_classes=14,
+                              linear_in_features=512*12*10,
+                            )
+  vgg16.to(device)
+
   criterion = nn.BCEWithLogitsLoss()
-  optimizer = torch.optim.Adam( vgg16_classifier.parameters(),
-                                lr=0.001)
+  optimizer = torch.optim.Adam(vgg16.parameters(),
+                                lr=0.001
+                              )
+  
   min_val_loss=np.inf
-  loop = trange(epochs, desc='Epochs Outer')
-  for i in loop:
-    t_loss=train_model(vgg16_classifier, train, criterion, optimizer, device,
-                      save_freq, start_time, time_out, ckpt_dir)
+  for i in trange(epochs, desc='Epochs Outer'):
+    curr_loss=train_model(vgg16,
+                          train_loader, 
+                          criterion, 
+                          optimizer, 
+                          device,
+                          **saving_cfg)
 
-    if time.time() - start_time > 0.9*time_out:
-      filename=ckpt_dir+"/vgg_epoch_{}_train_{:.3f}.pt".format(i, t_loss)
-      torch.save(vgg16_classifier.state_dict, filename)
+    # if time.time() - start_time > 0.9*time_out:
+      
 
-    curr_loss=eval_model(vgg16_classifier, val, criterion, device)
+  #   curr_loss=eval_model(vgg16_classifier, val, criterion, device)
 
-    if curr_loss<min_val_loss:
-      filename=ckpt_dir+"/vgg_epoch_{}_train_{:.3f}_min_val_{:.3f}.pt".format(i,
-                                                                  t_loss,
-                                                                  curr_loss)
-      # print("Saving Model with validation loss: {:.3f}".format(curr_loss))
-      torch.save(vgg16_classifier.state_dict, filename)
-      min_val_loss=curr_loss
-  filename=ckpt_dir+'/completed_vgg_train_{:.3f}_val_{.3f}.pt'
-  torch.save(vgg16_classifier, filename)
+  #   if curr_loss<min_val_loss:
+  #     filename=ckpt_dir+"/vgg_epoch_{}_train_{:.3f}_min_val_{:.3f}.pt".format(i,
+  #                                                                 t_loss,
+  #                                                                 curr_loss)
+  #     # print("Saving Model with validation loss: {:.3f}".format(curr_loss))
+  #     torch.save(vgg16_classifier.state_dict, filename)
+  #     min_val_loss=curr_loss
+  # filename=ckpt_dir+'/completed_vgg_train_{:.3f}_val_{.3f}.pt'
+  # torch.save(vgg16_classifier, filename)
