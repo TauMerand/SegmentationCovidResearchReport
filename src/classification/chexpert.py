@@ -79,15 +79,14 @@ def eval_model(model, val_loader, criterion, device):
   return val_loss / len(val_loader.dataset)
 
 
-def vgg16_classifier(file_paths: Optional[Dict[str, str]] = None,
-                      loader_cfg: Optional[Dict[str, str]] = None,
+def vgg16_classifier(loader_cfg: Optional[Dict[str, str]] = None,
                       saving_cfg: Optional[Dict[str, str]] = None,
                       weights: Optional[str] = "imagenet",
                       epochs: Optional[int] = 1,
                       device = torch.device("cuda" if torch.cuda.is_available() else "cpu"),
                     ):
 
-  train_loader, val_loader = ChexpertLoader(**file_paths, **loader_cfg)
+  train_loader, val_loader = ChexpertLoader(**loader_cfg)
 
   vgg16 = PretrainClassifier(backbone="vgg16", 
                               weights=weights,
