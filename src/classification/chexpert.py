@@ -1,6 +1,6 @@
 from typing import Optional, Dict
 
-from classification.utils import save_checkpoint
+from .utils import save_checkpoint
 from .models import PretrainClassifier
 from .data import ChexpertLoader
 
