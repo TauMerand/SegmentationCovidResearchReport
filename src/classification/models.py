@@ -23,7 +23,7 @@ class PretrainModel(nn.Module):
                                 in_channels=3, 
                                 depth=5, 
                                 weights=weights)
-      model=None
+      # model=None
     else:
       print('Loading pretrained model from: {}'.format(ckpt_path))
       model = PretrainModel(backbone=backbone, 
@@ -34,7 +34,7 @@ class PretrainModel(nn.Module):
       model.load_state_dict(torch.load(ckpt_path), strict=False)
       self.backbone = model.backbone
       del model.backbone
-    return model
+    # return model
         
   @autocast()
   def forward(self, x):
