@@ -23,18 +23,12 @@ class PretrainModel(nn.Module):
                                 in_channels=3, 
                                 depth=5, 
                                 weights=weights)
-      # model=None
     else:
       print('Loading pretrained model from: {}'.format(ckpt_path))
-      model = PretrainModel(backbone=backbone, 
-                            weights=None,
-                            ckpt_path=None, 
-                            name = name
-                            )
+      model = PretrainModel(backbone=backbone, name=name)
       model.load_state_dict(torch.load(ckpt_path), strict=False)
       self.backbone = model.backbone
-      del model.backbone
-    # return model
+      del model
         
   @autocast()
   def forward(self, x):
@@ -53,20 +47,27 @@ class PretrainClassifier(PretrainModel):
                 pretrained_backbone: Optional[str] = None,
                 
               ):
-    model=super().__init__(backbone=backbone, 
-                            weights=weights, 
-                            name=name,
-                            ckpt_path=pretrained_backbone
-                          )
-    if ckpt_path is None and model is None:
+    if ckpt_path is None:
+      super().__init__(backbone=backbone, 
+                      weights=weights, 
+                      name=name,
+                      ckpt_path=pretrained_backbone
+                    )
       self.fc = nn.Linear(linear_in_features, 2048, bias=True)
       self.classify=nn.Linear(2048, num_classes)
-      # init.initialize_head(self.fc)
-      # init.initialize_head(self.classify)
     else:
+      model=PretrainClassifier(backbone=backbone, 
+                              num_classes=num_classes,
+                              linear_in_features=linear_in_features,
+                              name=name)
+      model.load_state_dict(torch.load(ckpt_path))
+      self.backbone=model.backbone
       self.fc=model.fc
       self.classify=model.classify
       del model
+    
+      # init.initialize_head(self.fc)
+      # init.initialize_head(self.classify)
 
         
   @autocast()
