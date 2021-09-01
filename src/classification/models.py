@@ -36,7 +36,7 @@ class PretrainModel(nn.Module):
     return x
 
 
-class PretrainClassifier(PretrainModel, nn.Module):
+class PretrainClassifier(nn.Module):
   def __init__( self, 
                 backbone: str, 
                 num_classes: int,
@@ -49,7 +49,7 @@ class PretrainClassifier(PretrainModel, nn.Module):
               ):
     super().__init__()
     if ckpt_state is None:
-      super().__init__(backbone=backbone, 
+      self.backbone=PretrainModel(backbone=backbone, 
                       weights=weights, 
                       name=name,
                       ckpt_state=backbone_state
