@@ -109,7 +109,7 @@ def vgg16_classifier(loader_cfg: Optional[Dict[str, str]] = {},
                               ckpt_state=model_state
                             )
 
-  summary(vgg16, input_size=(320, 390, 3))
+  # summary(vgg16, input_size=(320, 390, 3))
   vgg16.to(device)
 
   criterion = nn.BCEWithLogitsLoss()
