@@ -30,6 +30,7 @@ def train_model(model,
                 **save_cfg):
 
   save_freq=save_cfg.pop("save_freq", len(train_loader)//2)
+  time_sensitive=save_cfg.pop("time_sensitive", False)
   start_time=save_cfg.pop("start_time", time.time())
   time_out=save_cfg.pop("time_out", 9*60*60)
   threshold=save_cfg.pop("time_threshold", 0.8)
@@ -51,13 +52,15 @@ def train_model(model,
 
       batch_losses.append(loss.item())
       if i % save_freq == 0:
-        if time.time() - start_time > threshold*time_out:
-          save_checkpoint(model, train_loss=np.mean(batch_losses), **save_cfg)      
+        if not time_sensitive or time.time() - start_time > threshold*time_out:
+          print("Saving Checkpoint i = {}".format(i))
+          save_checkpoint(model, optimizer, sub_dir='train', **save_cfg):
+          
       loop.set_postfix(loss=np.mean(batch_losses))
   else: #TODO TPU XLA code
     print("TPU")
 
-  return np.mean(batch_losses)
+  return batch_losses
 
 
 def eval_model(model, 
@@ -91,12 +94,14 @@ def vgg16_classifier(loader_cfg: Optional[Dict[str, str]] = {},
 
   train_loader, val_loader = ChexpertLoader(**loader_cfg)
 
+  checkpoint = torch.load(ckpt)
+  
   vgg16 = PretrainClassifier(backbone="vgg16", 
                               weights=weights,
                               num_classes=14,
                               linear_in_features=512*12*10,
                               name="vgg16_{}".format(weights),
-                              ckpt_path=ckpt
+                              ckpt_state=checkpoint['state_dict']
                             )
   vgg16.to(device)
 
@@ -104,10 +109,12 @@ def vgg16_classifier(loader_cfg: Optional[Dict[str, str]] = {},
   optimizer = torch.optim.Adam(vgg16.parameters(),
                                 lr=0.001
                               )
-  
+  optimizer.load_state_dict(checkpoint['optimizer'])
+        
+  epochs+=checkpoint['epoch']
   min_val_loss=np.inf
-  for i in trange(epochs, desc='Epochs Outer'):
-    curr_loss=train_model(vgg16,
+  for i in trange(checkpoint['epoch'], epochs, desc='Epochs Outer'):
+    train_losses=train_model(vgg16,
                           train_loader, 
                           criterion, 
                           optimizer, 
@@ -116,7 +123,7 @@ def vgg16_classifier(loader_cfg: Optional[Dict[str, str]] = {},
     val_loss=eval_model(vgg16, val_loader, criterion, device)
 
     if val_loss<min_val_loss:
-      save_checkpoint(vgg16, epoch=i, train_loss=curr_loss, val_loss=val_loss, **save_cfg) 
+      save_checkpoint(vgg16, epoch=i, train_loss=np.mean(train_losses), val_loss=val_loss, **save_cfg) 
       min_val_loss=val_loss
-  save_checkpoint(vgg16, out_name="completed", epoch=epochs, train_loss=curr_loss, val_loss=val_loss, **save_cfg) 
+  save_checkpoint(vgg16, out_name="completed", epoch=epochs, train_loss=np.mean(train_losses), val_loss=val_loss, **save_cfg) 
   return vgg16, train_loader, val_loader

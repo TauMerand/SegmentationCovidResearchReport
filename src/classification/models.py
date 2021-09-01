@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, OrderedDict
 
 import torch
 import torch.nn as nn
@@ -14,19 +14,19 @@ class PretrainModel(nn.Module):
                 backbone: str, 
                 name: str,
                 weights: Optional[str] = None,
-                ckpt_path: Optional[str] = None,
+                ckpt_state: Optional[str] = None,
               ):
     super().__init__()
     self.name=name
-    if ckpt_path is None:
+    if ckpt_state is None:
       self.backbone=get_encoder(backbone, 
                                 in_channels=3, 
                                 depth=5, 
                                 weights=weights)
     else:
-      print('Loading pretrained model from: {}'.format(ckpt_path))
+      print('Loading pretrained model')
       model = PretrainModel(backbone=backbone, name=name)
-      model.load_state_dict(torch.load(ckpt_path), strict=False)
+      model.load_state_dict(ckpt_state, strict=False)
       self.backbone = model.backbone
       del model
         
@@ -43,15 +43,15 @@ class PretrainClassifier(PretrainModel):
                 linear_in_features: int,
                 name: str,
                 weights: Optional[str] = None,
-                ckpt_path: Optional[str] = None,
-                pretrained_backbone: Optional[str] = None,
+                ckpt_state: Optional[OrderedDict] = None,
+                backbone_state: Optional[OrderedDict] = None,
                 
               ):
-    if ckpt_path is None:
+    if ckpt_state is None:
       super().__init__(backbone=backbone, 
                       weights=weights, 
                       name=name,
-                      ckpt_path=pretrained_backbone
+                      ckpt_path=backbone_state
                     )
       self.fc = nn.Linear(linear_in_features, 2048, bias=True)
       self.classify=nn.Linear(2048, num_classes)
@@ -60,7 +60,7 @@ class PretrainClassifier(PretrainModel):
                               num_classes=num_classes,
                               linear_in_features=linear_in_features,
                               name=name)
-      model.load_state_dict(torch.load(ckpt_path))
+      model.load_state_dict(ckpt_state)
       self.backbone=model.backbone
       self.fc=model.fc
       self.classify=model.classify
