@@ -12,9 +12,10 @@ def all_the_seeds(seed=42):
     torch.cuda.manual_seed(seed)
 
 def save_checkpoint(model,
-                    optimizer,
+                    optimizer=None,
                     ckpt_num=None,
                     sub_dir=None,
+                    out_name=None,
                     epoch=None,
                     ckpt_dir=None,
                     train_loss=None, 
@@ -27,8 +28,11 @@ def save_checkpoint(model,
     ckpt_dir+="/{}".format(sub_dir)
 
   os.makedirs(ckpt_dir, exist_ok=True)
+
   ckpt_path=ckpt_dir+'/{}'.format(model.name)
 
+  if out_name is not None:
+    ckpt_path+="_{}".format(out_name)
   if epoch is not None:
     ckpt_path+='_epoch:{}'.format(epoch)
   if train_loss is not None:
@@ -37,13 +41,12 @@ def save_checkpoint(model,
     ckpt_path+="_v:{:.3f}".format(val_loss)
   if ckpt_num is not None:
     ckpt_path+='.pt{}'.format(ckpt_num)
-
-  state = {
-        'state_dict': model.state_dict(),
-        'optimizer': optimizer.state_dict(),
-        }
   
-  torch.save(state, ckpt_path)
+  if optimizer is not None:
+    torch.save(model.state_dict(), ckpt_path+".model")
+    torch.save(optimizer.state_dict(), ckpt_path+".optim")
+  else:
+    torch.save(model.state_dict(), ckpt_path)
 
 # def save_train_checkpoint(model, 
 #                           optimizer,

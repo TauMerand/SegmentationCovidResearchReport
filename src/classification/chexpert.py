@@ -94,7 +94,8 @@ def vgg16_classifier(loader_cfg: Optional[Dict[str, str]] = {},
 
   train_loader, val_loader = ChexpertLoader(**loader_cfg)
 
-  checkpoint = torch.load(ckpt)
+
+  checkpoint = torch.load(ckpt) if ckpt is not None else None
   
   vgg16 = PretrainClassifier(backbone="vgg16", 
                               weights=weights,
@@ -109,11 +110,12 @@ def vgg16_classifier(loader_cfg: Optional[Dict[str, str]] = {},
   optimizer = torch.optim.Adam(vgg16.parameters(),
                                 lr=0.001
                               )
-  optimizer.load_state_dict(checkpoint['optimizer'])
-        
-  epochs+=checkpoint['epoch']
+  if checkpoint is not None:
+    optimizer.load_state_dict(checkpoint['optimizer'])
+    epochs+=checkpoint['epoch']
+  start=checkpoint['epoch'] if checkpoint is not None else 0
   min_val_loss=np.inf
-  for i in trange(checkpoint['epoch'], epochs, desc='Epochs Outer'):
+  for i in trange(start, epochs, desc='Epochs Outer'):
     train_losses=train_model(vgg16,
                           train_loader, 
                           criterion, 
@@ -123,7 +125,7 @@ def vgg16_classifier(loader_cfg: Optional[Dict[str, str]] = {},
     val_loss=eval_model(vgg16, val_loader, criterion, device)
 
     if val_loss<min_val_loss:
-      save_checkpoint(vgg16, epoch=i, train_loss=np.mean(train_losses), val_loss=val_loss, **save_cfg) 
+      save_checkpoint(vgg16, sub_dir="min_vals", val_loss=val_loss, **save_cfg) 
       min_val_loss=val_loss
   save_checkpoint(vgg16, out_name="completed", epoch=epochs, train_loss=np.mean(train_losses), val_loss=val_loss, **save_cfg) 
   return vgg16, train_loader, val_loader
