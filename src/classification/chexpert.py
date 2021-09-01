@@ -54,7 +54,7 @@ def train_model(model,
       if i % save_freq == 0:
         if not time_sensitive or time.time() - start_time > threshold*time_out:
           print("Saving Checkpoint i = {}".format(i))
-          save_checkpoint(model, optimizer, sub_dir='train', **save_cfg):
+          save_checkpoint(model, optimizer, sub_dir='train', **save_cfg)
           
       loop.set_postfix(loss=np.mean(batch_losses))
   else: #TODO TPU XLA code
