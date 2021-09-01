@@ -48,6 +48,7 @@ class PretrainClassifier(nn.Module):
                 
               ):
     super().__init__()
+    self.name=name
     if ckpt_state is None:
       model=PretrainModel(backbone=backbone, 
                       weights=weights, 
