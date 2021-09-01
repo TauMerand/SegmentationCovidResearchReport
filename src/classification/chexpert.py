@@ -30,6 +30,7 @@ def train_model(model,
                 optimizer, 
                 device, 
                 **save_cfg):
+  
 
   save_freq=save_cfg.pop("save_freq", len(train_loader)//2)
   time_sensitive=save_cfg.pop("time_sensitive", False)
@@ -42,6 +43,8 @@ def train_model(model,
   if device.type == 'cuda' or device.type == 'cpu':
     loop = tqdm(train_loader, desc='Train Inner')
     for i, (images, labels) in enumerate(loop):
+      print(images.shape)
+      return
       images = images.to(device)
       labels = labels.to(device)
       with torch.cuda.amp.autocast(): 
@@ -106,7 +109,7 @@ def vgg16_classifier(loader_cfg: Optional[Dict[str, str]] = {},
                               ckpt_state=model_state
                             )
 
-  torchinfo(vgg16, (320, 390, 3))
+  summary(vgg16, input_size=(320, 390, 3))
   vgg16.to(device)
 
   criterion = nn.BCEWithLogitsLoss()
