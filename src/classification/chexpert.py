@@ -20,6 +20,8 @@ from torch.cuda.amp import autocast
 
 # from warmup_scheduler import GradualWarmupScheduler
 
+from torchinfo import summary
+
 
 
 def train_model(model, 
@@ -103,6 +105,8 @@ def vgg16_classifier(loader_cfg: Optional[Dict[str, str]] = {},
                               name="vgg16_{}".format(weights),
                               ckpt_state=model_state
                             )
+
+  torchinfo(vgg16, (320, 390, 3))
   vgg16.to(device)
 
   criterion = nn.BCEWithLogitsLoss()
