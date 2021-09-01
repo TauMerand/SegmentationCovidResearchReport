@@ -76,9 +76,9 @@ class PretrainClassifier(nn.Module):
   @autocast()
   def forward(self, x):
     x = self.backbone(x)[-1] 
-    print("Backbone out shape: {}".format(x.shape))
+    # print("Backbone out shape: {}".format(x.shape))
     x=torch.flatten(x, 1)
-    print("Flatten out shape: {}".format(x.shape))
+    # print("Flatten out shape: {}".format(x.shape))
     x = self.fc(x)
     x = F.dropout(x, p=0.5, training=self.training)
     x = F.relu(x)

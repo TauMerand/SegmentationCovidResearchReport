@@ -20,9 +20,6 @@ from torch.cuda.amp import autocast
 
 # from warmup_scheduler import GradualWarmupScheduler
 
-from torchinfo import summary
-
-
 
 def train_model(model, 
                 train_loader, 
