@@ -51,7 +51,7 @@ class PretrainClassifier(PretrainModel):
       super().__init__(backbone=backbone, 
                       weights=weights, 
                       name=name,
-                      ckpt_path=backbone_state
+                      ckpt_state=backbone_state
                     )
       self.fc = nn.Linear(linear_in_features, 2048, bias=True)
       self.classify=nn.Linear(2048, num_classes)

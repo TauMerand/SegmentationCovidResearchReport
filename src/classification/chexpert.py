@@ -100,7 +100,7 @@ def vgg16_classifier(loader_cfg: Optional[Dict[str, str]] = {},
                               num_classes=14,
                               linear_in_features=512*12*10,
                               name="vgg16_{}".format(weights),
-                              ckpt_state=model_ckpt
+                              ckpt_state=torch.load(model_ckpt)
                             )
   vgg16.to(device)
 
