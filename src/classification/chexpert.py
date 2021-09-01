@@ -89,20 +89,18 @@ def vgg16_classifier(loader_cfg: Optional[Dict[str, str]] = {},
                       weights: Optional[str] = "imagenet",
                       epochs: Optional[int] = 1,
                       device = torch.device("cuda" if torch.cuda.is_available() else "cpu"),
-                      ckpt: Optional[str] = None
+                      model_ckpt: Optional[str] = None,
+                      optim_ckpt: Optional[str] = None,
                     ):
 
   train_loader, val_loader = ChexpertLoader(**loader_cfg)
-
-
-  checkpoint = torch.load(ckpt) if ckpt is not None else None
   
   vgg16 = PretrainClassifier(backbone="vgg16", 
                               weights=weights,
                               num_classes=14,
                               linear_in_features=512*12*10,
                               name="vgg16_{}".format(weights),
-                              ckpt_state=checkpoint['state_dict']
+                              ckpt_state=model_ckpt
                             )
   vgg16.to(device)
 
@@ -110,12 +108,11 @@ def vgg16_classifier(loader_cfg: Optional[Dict[str, str]] = {},
   optimizer = torch.optim.Adam(vgg16.parameters(),
                                 lr=0.001
                               )
-  if checkpoint is not None:
-    optimizer.load_state_dict(checkpoint['optimizer'])
-    epochs+=checkpoint['epoch']
-  start=checkpoint['epoch'] if checkpoint is not None else 0
+  if optim_ckpt is not None:
+    optimizer.load_state_dict(torch.load(optim_ckpt))
+
   min_val_loss=np.inf
-  for i in trange(start, epochs, desc='Epochs Outer'):
+  for i in trange(epochs, desc='Epochs Outer'):
     train_losses=train_model(vgg16,
                           train_loader, 
                           criterion, 
