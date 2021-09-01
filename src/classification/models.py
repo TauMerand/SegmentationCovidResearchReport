@@ -75,6 +75,7 @@ class PretrainClassifier(nn.Module):
   def forward(self, x):
     x = self.backbone(x)[-1] 
     x=torch.flatten(x, 1)
+    print(x.shape)
     x = self.fc(x)
     x = F.dropout(x, p=0.5, training=self.training)
     x = F.relu(x)
