@@ -14,24 +14,24 @@ class PretrainModel(nn.Module):
                 backbone: str, 
                 name: str,
                 weights: Optional[str] = None,
-                pretrained_path: Optional[str] = None,
+                ckpt_path: Optional[str] = None,
               ):
     super().__init__()
     self.name=name
-    if pretrained_path is None:
+    if ckpt_path is None:
       self.backbone=get_encoder(backbone, 
                                 in_channels=3, 
                                 depth=5, 
                                 weights=weights)
       model=None
     else:
-      print('Loading pretrained model from: {}'.format(pretrained_path))
+      print('Loading pretrained model from: {}'.format(ckpt_path))
       model = PretrainModel(backbone=backbone, 
                             weights=None,
-                            pretrained_path=None, 
+                            ckpt_path=None, 
                             name = name
                             )
-      model.load_state_dict(torch.load(pretrained_path))
+      model.load_state_dict(torch.load(ckpt_path), strict=False)
       self.backbone = model.backbone
       del model.backbone
     return model
@@ -49,15 +49,16 @@ class PretrainClassifier(PretrainModel):
                 linear_in_features: int,
                 name: str,
                 weights: Optional[str] = None,
-                pretrained_path: Optional[str] = None,
+                ckpt_path: Optional[str] = None,
+                pretrained_backbone: Optional[str] = None,
                 
               ):
     model=super().__init__(backbone=backbone, 
                             weights=weights, 
                             name=name,
-                            pretrained_path=pretrained_path
+                            ckpt_path=pretrained_backbone
                           )
-    if pretrained_path is None and model is None:
+    if ckpt_path is None and model is None:
       self.fc = nn.Linear(linear_in_features, 2048, bias=True)
       self.classify=nn.Linear(2048, num_classes)
       # init.initialize_head(self.fc)
