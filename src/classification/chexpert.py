@@ -118,4 +118,5 @@ def vgg16_classifier(loader_cfg: Optional[Dict[str, str]] = {},
     if val_loss<min_val_loss:
       save_checkpoint(vgg16, epoch=i, train_loss=curr_loss, val_loss=val_loss, **save_cfg) 
       min_val_loss=val_loss
+  save_checkpoint(vgg16, out_name="completed", epoch=epochs, train_loss=curr_loss, val_loss=val_loss, **save_cfg) 
   return vgg16, train_loader, val_loader

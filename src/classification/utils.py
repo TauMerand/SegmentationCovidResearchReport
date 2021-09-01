@@ -11,6 +11,7 @@ def all_the_seeds(seed=42):
     torch.cuda.manual_seed(seed)
 
 def save_checkpoint(model,
+                    out_name=None,
                     epoch=None,
                     ckpt_dir=None,
                     train_loss=None, 
@@ -22,7 +23,10 @@ def save_checkpoint(model,
   
   os.makedirs(ckpt_dir, exist_ok=True)
 
+  if out_name is not None:
+    ckpt_path=ckpt_dir+'/{}'.format(out_name)
   ckpt_path=ckpt_dir+'/{}'.format(model.name)
+  
   if epoch is not None:
     ckpt_path+='_epoch:{}'.format(epoch)
   if train_loss is not None:
