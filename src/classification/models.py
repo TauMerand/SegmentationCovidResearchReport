@@ -49,11 +49,13 @@ class PretrainClassifier(nn.Module):
               ):
     super().__init__()
     if ckpt_state is None:
-      self.backbone=PretrainModel(backbone=backbone, 
+      model=PretrainModel(backbone=backbone, 
                       weights=weights, 
                       name=name,
                       ckpt_state=backbone_state
                     )
+      self.backbone=model.backbone
+      del model
       self.fc = nn.Linear(linear_in_features, 2048, bias=True)
       self.classify=nn.Linear(2048, num_classes)
     else:
@@ -74,9 +76,9 @@ class PretrainClassifier(nn.Module):
   @autocast()
   def forward(self, x):
     x = self.backbone(x)[-1] 
-    print(x.shape)
+    print("Backbone out shape: {}".format(x.shape))
     x=torch.flatten(x, 1)
-    print(x.shape)
+    print("Flatten out shape: {}".format(x.shape))
     x = self.fc(x)
     x = F.dropout(x, p=0.5, training=self.training)
     x = F.relu(x)

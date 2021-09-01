@@ -43,8 +43,6 @@ def train_model(model,
   if device.type == 'cuda' or device.type == 'cpu':
     loop = tqdm(train_loader, desc='Train Inner')
     for i, (images, labels) in enumerate(loop):
-      print(images.shape)
-      return
       images = images.to(device)
       labels = labels.to(device)
       with torch.cuda.amp.autocast(): 
