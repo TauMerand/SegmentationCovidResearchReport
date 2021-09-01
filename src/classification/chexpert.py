@@ -92,6 +92,7 @@ def vgg16_classifier(loader_cfg: Optional[Dict[str, str]] = {},
                       model_ckpt: Optional[str] = None,
                       optim_ckpt: Optional[str] = None,
                     ):
+  model_state=torch.load(model_ckpt) if model_ckpt is not None else None
 
   train_loader, val_loader = ChexpertLoader(**loader_cfg)
   
@@ -100,7 +101,7 @@ def vgg16_classifier(loader_cfg: Optional[Dict[str, str]] = {},
                               num_classes=14,
                               linear_in_features=512*12*10,
                               name="vgg16_{}".format(weights),
-                              ckpt_state=torch.load(model_ckpt)
+                              ckpt_state=model_state
                             )
   vgg16.to(device)
 
