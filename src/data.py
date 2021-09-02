@@ -1,26 +1,47 @@
+from typing import Tuple
+
 import numpy as np 
 import cv2 as cv
 import pandas as pd
+
 import torch
 from torch.utils.data import Dataset, DataLoader
+
 import albumentations as albu
 from albumentations.pytorch import ToTensorV2
+
 from timm.data import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
 
 class ExternalImageDataset(Dataset):
-    def __init__(self, dataframe, image_dir, image_shape , mode, classes, df_frac=1):
+    def __init__(self, 
+                  dataframe, 
+                  image_dir: str, 
+                  image_shape: Tuple[int, int], 
+                  mode: str, 
+                  classes: int, 
+                  df_frac: float = 1):
+        assert mode in ('train', "eval")
+
         super().__init__()
-        assert mode in ('train', "test")
+
         self.mode=mode
         self.df=dataframe.sample(frac=df_frac).reset_index(drop=True) 
         self.labels=classes
         self.img_dir=image_dir
         self.img_size=image_shape
-        self.transform = albu.Compose([
-                albu.Resize(self.img_size[0], self.img_size[1]),
-                albu.Normalize(mean=IMAGENET_DEFAULT_MEAN, std=IMAGENET_DEFAULT_STD),
-                ToTensorV2(),
-            ])
+
+        if mode == "train":
+          self.transform = albu.Compose([
+                  albu.Resize(self.img_size[0], self.img_size[1]),
+                  albu.Normalize(mean=IMAGENET_DEFAULT_MEAN, std=IMAGENET_DEFAULT_STD),
+                  ToTensorV2(),
+              ])
+        elif mode == "eval":
+          self.transform = albu.Compose([
+                  albu.Resize(self.img_size[0], self.img_size[1]),
+                  albu.Normalize(mean=IMAGENET_DEFAULT_MEAN, std=IMAGENET_DEFAULT_STD),
+                  ToTensorV2(),
+              ])
         
     def __len__(self):
         return len(self.df)
@@ -58,7 +79,7 @@ def ChexpertLoader(train_path,
   val_dataset = ExternalImageDataset( dataframe=valid_df, 
                                       image_dir=image_dir, 
                                       image_shape=image_size, 
-                                      mode='test',
+                                      mode='eval',
                                       classes=dst_classes,
                                       df_frac=val_frac)
 
