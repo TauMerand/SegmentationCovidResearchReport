@@ -16,8 +16,6 @@ from segmentation_models_pytorch.base import initialization as init
 import time
 from tqdm.notebook import tqdm
 
-
-
 class PretrainModel(nn.Module):
   def __init__( self, 
                 backbone: str, 
@@ -136,9 +134,6 @@ def train_model(model,
     print("TPU")
 
   return batch_losses
-
-
-
 
 def validate_model(model, 
                 val_loader,
