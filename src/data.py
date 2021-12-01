@@ -12,6 +12,7 @@ from albumentations.pytorch import ToTensorV2
 
 from timm.data import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
 
+# Need to fix weirdness
 class ExternalImageDataset(Dataset):
     def __init__(self, 
                   dataframe, 
