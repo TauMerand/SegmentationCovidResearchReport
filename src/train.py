@@ -19,7 +19,7 @@ from torch.cuda.amp import autocast
 # from warmup_scheduler import GradualWarmupScheduler
 
 
-
+# Put other models in here
 def vgg16_classifier(loader_cfg: Optional[Dict[str, str]] = {},
                       save_cfg: Optional[Dict[str, str]] = {},
                       weights: Optional[str] = "imagenet",

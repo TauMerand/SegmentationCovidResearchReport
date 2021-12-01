@@ -3,6 +3,7 @@ import numpy as np
 import torch
 import time
 import glob
+#random stuff
 
 def all_the_seeds(seed=42):
 #     random.seed(seed)

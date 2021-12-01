@@ -130,7 +130,7 @@ def train_model(model,
           save_checkpoint(model, optimizer, sub_dir='train', **save_cfg)
           
       loop.set_postfix(loss=np.mean(batch_losses))
-  else: #TODO TPU XLA code
+  else: 
     print("TPU")
 
   return batch_losses
